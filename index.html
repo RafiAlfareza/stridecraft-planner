@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StrideCraft — Generator Program Latihan Lari Berbasis Target Jarak, Waktu & Pace</title>
+  <meta name="description" content="Aplikasi pembuat program latihan lari ilmiah berdasarkan target waktu, jarak, pace, dan durasi minggu. Dilengkapi plotting mingguan (Easy, Tempo, Interval, Long Run, Strength) dan detail menu latihan presisi.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- Navigation Bar -->
+  <nav class="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-2.5 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            StrideCraft <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">PRO</span>
+          </span>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 -mt-0.5">Running Training Program Planner</p>
+        </div>
+      </a>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Print / PDF Button -->
+        <button id="btn-print-plan" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5" title="Cetak atau Simpan ke PDF">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Cetak / PDF</span>
+        </button>
+
+        <!-- Export Calendar Button -->
+        <button id="btn-export-ics" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20" title="Download file kalender .ics">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Export Kalender (.ics)</span>
+        </button>
+
+        <!-- Dark/Light Mode Toggle -->
+        <button id="theme-toggle" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Toggle Dark Mode" onclick="document.documentElement.classList.toggle('dark')">
+          <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header id="hero-section" class="relative overflow-hidden pt-10 pb-8 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-b from-emerald-50/50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900/80 dark:to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold mb-3">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Periodisasi Ilmiah Berbasis Jack Daniels VDOT & Ambang Laktat</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          Rancang Program Latihan Lari <br class="hidden sm:block">
+          <span class="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Presisi & Berdasarkan Target Anda</span>
+        </h1>
+        <p class="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+          Tentukan jarak lomba, target waktu finish, pace, serta lama minggu latihan. Aplikasi akan memetakan jadwal per minggu: <strong>Easy Run, Tempo, Interval VO2max, Long Run, hingga Strength Training</strong> lengkap dengan rincian menu pemanasan, repetisi, dan pendinginan.
+        </p>
+      </div>
+
+      <!-- Popular Presets Quick Selector -->
+      <div id="presets-section" class="mt-8">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="bookmark" class="w-3.5 h-3.5 text-emerald-500"></i>
+            Preset Target Populer (Klik untuk Pakai Langsung):
+          </h3>
+        </div>
+        <div id="presets-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- Injected via presets.js & app.js -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Plan Generator Form Card -->
+    <section id="form-section" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-7">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-6">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 class="font-bold text-slate-900 dark:text-white text-lg">Konfigurasi Target Latihan</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Atur parameter lomba dan preferensi jadwal mingguan Anda</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <!-- 1. Jarak Target -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+            1. Jarak Target (Target Distance)
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+            <button type="button" data-distance-btn="5" class="py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition flex flex-col items-center justify-center gap-0.5">
+              <span>5K</span>
+              <span class="text-[10px] font-normal opacity-75">5.00 km</span>
+            </button>
+            <button type="button" data-distance-btn="10" class="py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition flex flex-col items-center justify-center gap-0.5">
+              <span>10K</span>
+              <span class="text-[10px] font-normal opacity-75">10.00 km</span>
+            </button>
+            <button type="button" data-distance-btn="21.0975" class="py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition flex flex-col items-center justify-center gap-0.5">
+              <span>Half Marathon</span>
+              <span class="text-[10px] font-normal opacity-75">21.1 km</span>
+            </button>
+            <button type="button" data-distance-btn="42.195" class="py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition flex flex-col items-center justify-center gap-0.5">
+              <span>Full Marathon</span>
+              <span class="text-[10px] font-normal opacity-75">42.2 km</span>
+            </button>
+            <button type="button" data-distance-btn="-1" class="py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-bold text-center transition flex flex-col items-center justify-center gap-0.5">
+              <span>Kustom</span>
+              <span class="text-[10px] font-normal opacity-75">Jarak Lain</span>
+            </button>
+          </div>
+
+          <!-- Hidden input for custom distance -->
+          <input type="number" id="input-custom-distance" step="0.1" min="1" max="100" placeholder="Masukkan jarak kustom dalam km (contoh: 15)"
+                 class="hidden mt-2.5 w-full sm:w-64 px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <!-- 2. Target Waktu & Pace (Bi-directional sync!) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+          <!-- Target Waktu -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                2A. Waktu Target (Jam : Menit : Detik)
+              </label>
+              <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">Total Waktu Finish</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="text-[10px] text-slate-500 block mb-1">Jam</label>
+                <input type="number" id="input-hours" min="0" max="23" value="0"
+                       class="w-full text-center font-mono font-bold py-2 px-2 text-base rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-500 block mb-1">Menit</label>
+                <input type="number" id="input-minutes" min="0" max="59" value="49"
+                       class="w-full text-center font-mono font-bold py-2 px-2 text-base rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-500 block mb-1">Detik</label>
+                <input type="number" id="input-seconds" min="0" max="59" value="30"
+                       class="w-full text-center font-mono font-bold py-2 px-2 text-base rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Target Pace -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                2B. Atau Target Pace (Menit : Detik /km)
+              </label>
+              <span id="badge-calculated-speed" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                12.1 km/jam
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] text-slate-500 block mb-1">Menit /km</label>
+                <input type="number" id="input-pace-minutes" min="2" max="15" value="4"
+                       class="w-full text-center font-mono font-bold py-2 px-2 text-base rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-500 block mb-1">Detik /km</label>
+                <input type="number" id="input-pace-seconds" min="0" max="59" value="57"
+                       class="w-full text-center font-mono font-bold py-2 px-2 text-base rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Durasi Program & Frekuensi & Level -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Durasi Minggu -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              3. Berapa Lama Latihan?
+            </label>
+            <select id="input-weeks" class="w-full py-2.5 px-3 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              <option value="4">4 Minggu (Express / Tune-Up)</option>
+              <option value="8">8 Minggu (Singkat / 5K-10K)</option>
+              <option value="10" selected>10 Minggu (Ideal 10K)</option>
+              <option value="12">12 Minggu (Standar Half Marathon)</option>
+              <option value="16">16 Minggu (Standar Full Marathon)</option>
+              <option value="20">20 Minggu (Base to Peak Ekstensif)</option>
+            </select>
+          </div>
+
+          <!-- Frekuensi Hari per Minggu -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              4. Hari Latihan per Minggu
+            </label>
+            <select id="input-days" class="w-full py-2.5 px-3 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              <option value="3">3 Hari (Santai / Sibuk)</option>
+              <option value="4" selected>4 Hari (Rekomendasi Seimbang)</option>
+              <option value="5">5 Hari (Dedikasi Tinggi)</option>
+              <option value="6">6 Hari (Pelari Kompetitif)</option>
+            </select>
+          </div>
+
+          <!-- Level Pengalaman -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              5. Tingkat Pengalaman
+            </label>
+            <select id="input-level" class="w-full py-2.5 px-3 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+              <option value="beginner">Pemula (Fondasi Baru)</option>
+              <option value="intermediate" selected>Menengah (Sudah Rutin)</option>
+              <option value="advanced">Lanjutan (Volume Tinggi)</option>
+            </select>
+          </div>
+
+          <!-- Tanggal Mulai -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+              6. Tanggal Mulai
+            </label>
+            <input type="date" id="input-start-date"
+                   class="w-full py-2.5 px-3 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button id="btn-generate" class="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-lg shadow-emerald-600/30 transition transform active:scale-[0.99] flex items-center justify-center gap-2 text-base">
+            <i data-lucide="zap" class="w-5 h-5"></i>
+            <span>Buat Program Latihan Lengkap & Plotting Mingguan</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <div id="results-section" class="space-y-8">
+
+      <!-- Overall Metrics Dashboard -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-500"></i>
+            Ringkasan Target Program Latihan
+          </h2>
+        </div>
+        <div id="overview-metrics-container">
+          <!-- Injected via app.js -->
+        </div>
+
+        <!-- Program Progress Bar -->
+        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">Progress Latihan Anda</span>
+              <span id="progress-percent-label" class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">0%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="progress-count-label" class="text-xs text-slate-500 dark:text-slate-400">0 sesi selesai</span>
+              <button id="btn-reset-completed" class="text-[11px] text-slate-400 hover:text-red-500 transition underline">
+                Reset
+              </button>
+            </div>
+          </div>
+          <div class="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Training Paces Cheat-Sheet -->
+      <section class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="gauge" class="w-5 h-5 text-emerald-500"></i>
+              Panduan Zona Kecepatan (Training Paces Cheat Sheet)
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Dihitung otomatis berdasarkan target lomba Anda untuk setiap jenis latihan</p>
+          </div>
+        </div>
+        <div id="paces-cheatsheet-container">
+          <!-- Injected via app.js -->
+        </div>
+
+        <!-- Race Splits Checkpoints Container -->
+        <div id="race-splits-container" class="mt-4">
+          <!-- Injected via app.js -->
+        </div>
+      </section>
+
+      <!-- Weekly Volume Progression Chart -->
+      <section class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i>
+              Kurva Periodisasi & Volume Jarak Mingguan (Plotting Km)
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Melihat kenaikan jarak mingguan, puncak Long Run, minggu pemulihan, dan tapering akhir</p>
+          </div>
+          <!-- Legend Badges -->
+          <div class="flex items-center gap-2 flex-wrap text-[11px]">
+            <span class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+              <span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span> Base
+            </span>
+            <span class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+              <span class="w-3 h-3 rounded-sm bg-amber-500 inline-block"></span> Build
+            </span>
+            <span class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+              <span class="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span> Peak
+            </span>
+            <span class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+              <span class="w-3 h-3 rounded-sm bg-purple-500 inline-block"></span> Taper
+            </span>
+            <span class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+              <span class="w-3 h-0.5 bg-blue-600 inline-block"></span> Long Run
+            </span>
+          </div>
+        </div>
+        <div class="h-64 sm:h-72 w-full">
+          <canvas id="progression-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- Weekly Breakdown & Schedule Filters -->
+      <section class="space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="calendar-days" class="w-5 h-5 text-emerald-500"></i>
+              Plotting Jadwal Latihan Mingguan & Menu Detail
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Klik "Detail Menu" pada kartu latihan untuk melihat panduan lengkap pemanasan, set inti, dan pendinginan</p>
+          </div>
+
+          <!-- Type Filters -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+            <button data-type-filter="ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-slate-900 text-white dark:bg-emerald-500 dark:text-slate-900" onclick="App.setTypeFilter('ALL')">
+              Semua Sesi
+            </button>
+            <button data-type-filter="EASY" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200" onclick="App.setTypeFilter('EASY')">
+              Easy Run
+            </button>
+            <button data-type-filter="TEMPO" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200" onclick="App.setTypeFilter('TEMPO')">
+              Tempo
+            </button>
+            <button data-type-filter="INTERVAL" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200" onclick="App.setTypeFilter('INTERVAL')">
+              Interval
+            </button>
+            <button data-type-filter="LONGRUN" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200" onclick="App.setTypeFilter('LONGRUN')">
+              Long Run
+            </button>
+            <button data-type-filter="STRENGTH" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200" onclick="App.setTypeFilter('STRENGTH')">
+              Strength
+            </button>
+          </div>
+        </div>
+
+        <!-- Week Filter Horizontal Scrolling Tabs -->
+        <div id="week-filter-tabs" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <!-- Injected via app.js -->
+        </div>
+
+        <!-- Schedule Container -->
+        <div id="schedule-container">
+          <!-- Injected via app.js -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Workout Detail Modal -->
+  <div id="workout-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <!-- Backdrop -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Modal Content Card -->
+    <div class="modal-content-animated relative w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-7 max-h-[90vh] overflow-y-auto z-10">
+      <!-- Close Button -->
+      <button id="btn-modal-close" class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Injected Content -->
+      <div id="modal-workout-content">
+        <!-- Rendered via App.openWorkoutModal() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 py-10 bg-white dark:bg-slate-900 text-xs text-slate-500 dark:text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-md bg-emerald-600 flex items-center justify-center text-white font-bold text-xs">S</div>
+        <span class="font-bold text-slate-800 dark:text-white">StrideCraft PRO</span> — Platform Pembuat Rencana Latihan Lari Ilmiah
+      </div>
+      <p class="text-center sm:text-right">
+        Dirancang berdasarkan prinsip periodisasi Jack Daniels VDOT, Arthur Lydiard, & Pete Pfitzinger.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/pacing.js"></script>
+  <script src="js/strength.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
