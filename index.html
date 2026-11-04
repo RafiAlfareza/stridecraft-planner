@@ -59,6 +59,12 @@
 
       <!-- Quick Action Buttons -->
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Smartwatch Guide Button -->
+        <button onclick="App.openSmartwatchGuide()" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 transition flex items-center gap-1.5" title="Cara menghubungkan latihan ke Smartwatch">
+          <i data-lucide="watch" class="w-3.5 h-3.5"></i>
+          <span class="hidden md:inline">Hubungkan ke Jam</span>
+        </button>
+
         <!-- Print / PDF Button -->
         <button id="btn-print-plan" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5" title="Cetak atau Simpan ke PDF">
           <i data-lucide="printer" class="w-3.5 h-3.5"></i>
@@ -417,6 +423,72 @@
     </div>
   </main>
 
+  <!-- Smartwatch Connection Guide Modal -->
+  <div id="smartwatch-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="App.closeSmartwatchGuide()"></div>
+    <div class="modal-content-animated relative w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-7 max-h-[90vh] overflow-y-auto z-10">
+      <button class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="App.closeSmartwatchGuide()">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-1.5">
+          <i data-lucide="watch" class="w-3.5 h-3.5"></i> Integrasi Jam Lari
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          Cara Menghubungkan Latihan ke Smartwatch
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Ada 2 cara praktis agar menu latihan, target pace, dan jarak muncul langsung di pergelangan tangan Anda saat berlari:
+        </p>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm">
+        <!-- Metode 1: Kalender (Paling Mudah & Otomatis) -->
+        <div class="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20">
+          <div class="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-400 text-sm mb-2">
+            <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">1</span>
+            <span>Metode 1: Sinkronisasi Kalender (.ics) — Otomatis Muncul Setiap Hari</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 mb-2">
+            Metode ini memasukkan seluruh program latihan (misal 12 minggu) langsung ke kalender smartwatch Anda dengan alarm getar harian.
+          </p>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 pl-1">
+            <li>Klik tombol hijau <strong>"Export Kalender (.ics)"</strong> di bagian atas web ini untuk mengunduh berkas kalender.</li>
+            <li>Buka file tersebut di HP/Laptop Anda dan impor ke <strong>Google Calendar</strong> atau <strong>Apple Calendar</strong>.</li>
+            <li><strong>Garmin:</strong> Buka aplikasi <em>Garmin Connect</em> di HP → <em>Settings</em> → <em>3rd Party Apps</em> → aktifkan <em>Calendar Sync</em>. Setiap pagi jam Garmin akan memunculkan menu latihan hari itu!</li>
+            <li><strong>Apple Watch:</strong> Buka app <em>Calendar</em> bawaan Apple Watch, jadwal latihan otomatis tersinkron dan memberi notifikasi target jarak & pace.</li>
+            <li><strong>Coros & Samsung Galaxy Watch:</strong> Aktifkan sinkronisasi kalender di aplikasi HP (Coros App / Galaxy Wearable).</li>
+          </ol>
+        </div>
+
+        <!-- Metode 2: File Latihan Terstruktur (.tcx) -->
+        <div class="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20">
+          <div class="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-400 text-sm mb-2">
+            <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">2</span>
+            <span>Metode 2: Unduh Menu Terstruktur (.tcx) — Dilengkapi Alarm Pace & Interval</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 mb-2">
+            Jam akan bergetar dan berbunyi otomatis saat Anda berlari terlalu lambat/cepat dari target pace, serta menghitung mundur waktu interval dan rest:
+          </p>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 pl-1">
+            <li>Klik <strong>"Detail Menu"</strong> pada sesi latihan yang diinginkan (misal: <em>Interval 5x800m</em> atau <em>Tempo Run</em>).</li>
+            <li>Klik tombol biru <strong>"File Jam (.tcx)"</strong> di dalam modal untuk mengunduh berkas latihan terstruktur.</li>
+            <li><strong>Garmin:</strong> Masuk ke <a href="https://connect.garmin.com" target="_blank" class="text-blue-600 dark:text-blue-400 underline font-semibold">connect.garmin.com</a> di browser → Menu <em>Training & Planning</em> → <em>Workouts</em> → Impor file .tcx tersebut, lalu klik <em>Send to Device</em>.</li>
+            <li><strong>Coros:</strong> Buka <a href="https://training.coros.com" target="_blank" class="text-blue-600 dark:text-blue-400 underline font-semibold">Coros Training Hub</a> di browser → Impor workout ke kalender akun Coros Anda.</li>
+            <li><strong>Apple Watch:</strong> Gunakan aplikasi pihak ketiga seperti <strong>WorkOutDoors</strong> (bisa mengimpor file TCX/GPX langsung ke Apple Watch).</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+        <button class="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-700 transition" onclick="App.closeSmartwatchGuide()">
+          Saya Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Workout Detail Modal -->
   <div id="workout-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <!-- Backdrop -->
@@ -452,6 +524,7 @@
   <!-- Scripts -->
   <script src="js/pacing.js"></script>
   <script src="js/strength.js"></script>
+  <script src="js/tcx.js"></script>
   <script src="js/generator.js"></script>
   <script src="js/presets.js"></script>
   <script src="js/calendar.js"></script>
