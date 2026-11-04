@@ -1202,16 +1202,20 @@ const App = {
 
         <div class="flex items-center gap-2 w-full sm:w-auto">
           ${workout.type !== 'REST' && workout.type !== 'STRENGTH' ? `
-            <button class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/20"
-                    onclick="App.exportToTCX()" title="Download file .tcx untuk Garmin Connect atau Coros Training Hub">
-              <i data-lucide="watch" class="w-3.5 h-3.5"></i> File Jam (.tcx)
+            <button class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-500/20"
+                    onclick="App.exportToFIT()" title="Download file asli Garmin (.fit) untuk copy ke folder GARMIN/NewFiles via USB kabel">
+              <i data-lucide="watch" class="w-3.5 h-3.5"></i> Garmin (.fit)
+            </button>
+            <button class="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/20"
+                    onclick="App.exportToGarminJSON()" title="Download file Garmin Connect (.json) untuk ekstensi Garmin Workout Importer">
+              <i data-lucide="file-code" class="w-3.5 h-3.5"></i> Garmin (.json)
             </button>
           ` : ''}
           <button class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition flex items-center justify-center gap-1.5"
                   onclick="App.copyWorkoutSummary()">
             <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Menu
           </button>
-          <button class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition"
+          <button class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-700 dark:hover:bg-slate-600 transition"
                   onclick="App.closeWorkoutModal()">
             Tutup
           </button>
@@ -1281,6 +1285,32 @@ const App = {
       return;
     }
     CalendarExport.downloadICS(this.state.program, this.state.config.startDate);
+  },
+
+  /**
+   * Export Active Workout to Native Garmin (.fit) format
+   */
+  exportToFIT() {
+    const w = this.state.activeModalWorkout;
+    if (!w || !this.state.program) return;
+    if (typeof FITWorkoutGenerator !== 'undefined') {
+      FITWorkoutGenerator.downloadFIT(w, this.state.program.zones);
+    } else {
+      alert('Modul FIT belum dimuat.');
+    }
+  },
+
+  /**
+   * Export Active Workout to Garmin Connect JSON (.json) format
+   */
+  exportToGarminJSON() {
+    const w = this.state.activeModalWorkout;
+    if (!w || !this.state.program) return;
+    if (typeof GarminJSONExport !== 'undefined') {
+      GarminJSONExport.downloadJSON(w, this.state.program.zones);
+    } else {
+      alert('Modul Garmin JSON belum dimuat.');
+    }
   },
 
   /**
