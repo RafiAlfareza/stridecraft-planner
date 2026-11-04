@@ -33,6 +33,9 @@ const App = {
     if (typeof AuthEngine !== 'undefined') {
       AuthEngine.init();
     }
+    if (typeof StravaEngine !== 'undefined') {
+      StravaEngine.init();
+    }
     this.loadStateFromStorage();
     this.renderPresets();
     this.renderNavUser();
@@ -41,6 +44,9 @@ const App = {
 
     // Generate initial program
     this.handleGenerate();
+
+    // Render Strava section
+    this.renderStravaSection();
 
     // Re-initialize Lucide icons
     if (window.lucide) {
@@ -1663,6 +1669,193 @@ const App = {
       alert('Profil berhasil diperbarui!');
       this.renderNavUser();
       this.openProfileModal();
+    }
+  },
+
+  /**
+   * Render Strava Activities Section
+   */
+  renderStravaSection() {
+    if (typeof StravaEngine === 'undefined') return;
+
+    const isConnected = StravaEngine.state.isConnected;
+    const summary = StravaEngine.getActivitiesSummary();
+    const activities = StravaEngine.state.activities || [];
+
+    // Update status badge
+    const badgeEl = document.getElementById('strava-status-badge');
+    if (badgeEl) {
+      if (isConnected) {
+        badgeEl.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300';
+        badgeEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Terhubung';
+      } else {
+        badgeEl.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+        badgeEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Belum Terhubung';
+      }
+    }
+
+    // Summary cards
+    const summaryContainer = document.getElementById('strava-summary-container');
+    if (summaryContainer) {
+      summaryContainer.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-orange-50/60 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/60 font-mono">
+          <span class="text-[10px] block font-sans text-slate-500 dark:text-slate-400 uppercase">Total Jarak Strava</span>
+          <span class="text-xl font-bold text-orange-600 dark:text-orange-400">${summary.totalKm} <span class="text-xs font-normal">km</span></span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-mono">
+          <span class="text-[10px] block font-sans text-slate-500 dark:text-slate-400 uppercase">Total Sesi Lari</span>
+          <span class="text-xl font-bold text-slate-900 dark:text-white">${summary.totalRuns} <span class="text-xs font-normal">aktivitas</span></span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-mono">
+          <span class="text-[10px] block font-sans text-slate-500 dark:text-slate-400 uppercase">Rata-rata per Sesi</span>
+          <span class="text-xl font-bold text-slate-900 dark:text-white">${summary.avgDistanceKm} <span class="text-xs font-normal">km</span></span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-mono">
+          <span class="text-[10px] block font-sans text-slate-500 dark:text-slate-400 uppercase">Total Kudos Diterima</span>
+          <span class="text-xl font-bold text-amber-500 flex items-center gap-1">
+            🧡 ${summary.totalKudos}
+          </span>
+        </div>
+      `;
+    }
+
+    // Activities list
+    const listContainer = document.getElementById('strava-activities-list');
+    if (!listContainer) return;
+
+    if (activities.length === 0) {
+      listContainer.innerHTML = `
+        <div class="col-span-full p-8 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500">
+          Belum ada aktivitas Strava. Klik "Pengaturan Strava" untuk memuat aktivitas Anda.
+        </div>
+      `;
+      return;
+    }
+
+    listContainer.innerHTML = activities.map(act => {
+      const distStr = StravaEngine.formatDistanceKm(act.distance);
+      const paceStr = StravaEngine.formatPaceFromSpeed(act.average_speed);
+      const durStr = StravaEngine.formatDuration(act.moving_time);
+      const dateStr = StravaEngine.formatDateID(act.start_date_local);
+
+      return `
+        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-md transition">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              📅 ${dateStr}
+            </span>
+            <span class="text-xs font-mono font-bold text-orange-500 flex items-center gap-0.5">
+              🧡 ${act.kudos_count || 0}
+            </span>
+          </div>
+
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm line-clamp-1 mb-2">
+            ${act.name}
+          </h4>
+
+          <div class="grid grid-cols-3 gap-2 font-mono text-center text-xs pt-2 border-t border-slate-100 dark:border-slate-700/60">
+            <div class="p-1.5 rounded bg-slate-50 dark:bg-slate-750">
+              <span class="text-[9px] block font-sans text-slate-400">Jarak</span>
+              <strong class="text-slate-900 dark:text-white font-bold">${distStr}</strong>
+            </div>
+            <div class="p-1.5 rounded bg-slate-50 dark:bg-slate-750">
+              <span class="text-[9px] block font-sans text-slate-400">Pace Avg</span>
+              <strong class="text-emerald-600 dark:text-emerald-400 font-bold">${paceStr}</strong>
+            </div>
+            <div class="p-1.5 rounded bg-slate-50 dark:bg-slate-750">
+              <span class="text-[9px] block font-sans text-slate-400">Durasi</span>
+              <strong class="text-slate-900 dark:text-white font-bold">${durStr}</strong>
+            </div>
+          </div>
+
+          <div class="mt-2.5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+            <span>❤️ ${act.average_heartrate ? Math.round(act.average_heartrate) + ' BPM' : 'N/A'}</span>
+            <span>⛰️ +${act.total_elevation_gain || 0}m</span>
+            <span>📍 ${act.location_city || 'Outdoor'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  /**
+   * Strava Modal Handlers
+   */
+  openStravaModal() {
+    const modal = document.getElementById('strava-modal');
+    if (!modal) return;
+
+    const isConnected = StravaEngine.state.isConnected;
+    const statusText = document.getElementById('strava-modal-status-text');
+    if (statusText) {
+      statusText.textContent = isConnected ? 'Terhubung (Aktif)' : 'Belum Terhubung';
+      statusText.className = isConnected ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'font-semibold text-slate-400';
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  closeStravaModal() {
+    const modal = document.getElementById('strava-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  },
+
+  handleStravaConnectDemo() {
+    StravaEngine.connectDemo();
+    this.closeStravaModal();
+    this.renderStravaSection();
+    if (window.confetti) {
+      window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
+    }
+    alert('Riwayat lari Strava berhasil dimuat ke StrideCraft!');
+  },
+
+  handleStravaConnectToken() {
+    const token = document.getElementById('input-strava-token')?.value;
+    if (!token) {
+      alert('Harap masukkan Access Token Strava Anda.');
+      return;
+    }
+
+    StravaEngine.connectWithToken(token)
+      .then(res => {
+        this.closeStravaModal();
+        this.renderStravaSection();
+        alert(`Berhasil terhubung ke Strava! ${res.count} aktivitas lari berhasil disinkronkan.`);
+        if (window.confetti) {
+          window.confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 } });
+        }
+      })
+      .catch(err => {
+        alert(err.message || 'Gagal menghubungkan ke Strava.');
+      });
+  },
+
+  handleStravaDisconnect() {
+    if (confirm('Apakah Anda yakin ingin memutuskan hubungan dengan Strava?')) {
+      StravaEngine.disconnect();
+      this.closeStravaModal();
+      this.renderStravaSection();
+    }
+  },
+
+  refreshStravaActivities() {
+    if (StravaEngine.state.accessToken && StravaEngine.state.accessToken !== 'demo_token_strava_preview') {
+      this.handleStravaConnectToken();
+    } else {
+      StravaEngine.loadDemoActivities();
+      this.renderStravaSection();
+      alert('Riwayat lari Strava berhasil diperbarui!');
     }
   }
 };
