@@ -59,6 +59,11 @@
 
       <!-- Quick Action Buttons -->
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Runner Profile / Login Button Container -->
+        <div id="nav-user-container">
+          <!-- Injected via app.js (Login button or User Avatar/Profile button) -->
+        </div>
+
         <!-- Smartwatch Guide Button -->
         <button onclick="App.openSmartwatchGuide()" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 transition flex items-center gap-1.5" title="Cara menghubungkan latihan ke Smartwatch">
           <i data-lucide="watch" class="w-3.5 h-3.5"></i>
@@ -423,6 +428,270 @@
     </div>
   </main>
 
+  <!-- Authentication Modal (Login / Register) -->
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="App.closeAuthModal()"></div>
+    <div class="modal-content-animated relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 max-h-[90vh] overflow-y-auto z-10">
+      <button class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="App.closeAuthModal()">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Auth Header Tabs -->
+      <div class="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-3 mb-5">
+        <button id="tab-btn-login" class="font-bold text-base pb-1 border-b-2 border-emerald-500 text-slate-900 dark:text-white transition" onclick="App.switchAuthTab('login')">
+          Masuk (Login)
+        </button>
+        <button id="tab-btn-register" class="font-bold text-base pb-1 border-b-2 border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition" onclick="App.switchAuthTab('register')">
+          Daftar Pelari Baru
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login" onsubmit="App.handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Email</label>
+          <input type="email" id="login-email" required placeholder="nama@email.com"
+                 class="w-full py-2.5 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Kata Sandi</label>
+          <input type="password" id="login-password" required placeholder="••••••••"
+                 class="w-full py-2.5 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div id="login-error-msg" class="text-xs text-red-500 hidden"></div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition">
+          Masuk ke Akun
+        </button>
+        <div class="relative py-2 flex items-center justify-center">
+          <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+          <span class="bg-white dark:bg-slate-900 px-3 text-[11px] text-slate-400 uppercase tracking-wider absolute">atau</span>
+        </div>
+        <button type="button" onclick="App.handleDemoLogin()" class="w-full py-2.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500"></i> Masuk Cepat sebagai Akun Demo (1-Klik)
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" onsubmit="App.handleRegister(event)" class="space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+          <input type="text" id="reg-name" required placeholder="contoh: Rafi Alfareza"
+                 class="w-full py-2 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Email</label>
+          <input type="email" id="reg-email" required placeholder="nama@email.com"
+                 class="w-full py-2 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Kata Sandi</label>
+          <input type="password" id="reg-password" required placeholder="Minimal 6 karakter" minlength="6"
+                 class="w-full py-2 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usia (Tahun)</label>
+            <input type="number" id="reg-age" value="26" min="12" max="90"
+                   class="w-full py-2 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Resting HR (BPM)</label>
+            <input type="number" id="reg-resting-hr" value="55" min="35" max="100" placeholder="Detak istirahat"
+                   class="w-full py-2 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Running Club / Komunitas (Opsional)</label>
+          <input type="text" id="reg-club" placeholder="contoh: Mandiri Runners / IndoRunners"
+                 class="w-full py-2 px-3 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div id="reg-error-msg" class="text-xs text-red-500 hidden"></div>
+        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition mt-2">
+          Daftar Akun Pelari
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Runner Profile Dashboard Modal -->
+  <div id="profile-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="App.closeProfileModal()"></div>
+    <div class="modal-content-animated relative w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-7 max-h-[90vh] overflow-y-auto z-10">
+      <button class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="App.closeProfileModal()">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Profile Header Card -->
+      <div class="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-5 mb-5">
+        <img id="profile-avatar-img" src="" alt="Runner Avatar" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-500 shadow-md">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 id="profile-name" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white"></h2>
+            <span id="profile-club-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300"></span>
+          </div>
+          <p id="profile-email" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"></p>
+          <p id="profile-bio" class="text-xs text-slate-600 dark:text-slate-300 mt-1 italic"></p>
+        </div>
+      </div>
+
+      <!-- Profile Tabs -->
+      <div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2 mb-4 overflow-x-auto text-xs font-semibold">
+        <button id="p-tab-btn-overview" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white transition" onclick="App.switchProfileTab('overview')">
+          Ringkasan & Stats
+        </button>
+        <button id="p-tab-btn-hr" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition" onclick="App.switchProfileTab('hr')">
+          Zona Detak Jantung (BPM)
+        </button>
+        <button id="p-tab-btn-pbs" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition" onclick="App.switchProfileTab('pbs')">
+          Personal Best (PB) & Sepatu
+        </button>
+        <button id="p-tab-btn-edit" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition" onclick="App.switchProfileTab('edit')">
+          Edit Profil
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Overview -->
+      <div id="p-tab-content-overview" class="space-y-4">
+        <!-- Runner Stats Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center font-mono">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] block font-sans text-slate-400 uppercase">Usia</span>
+            <span id="p-stat-age" class="text-lg font-bold text-slate-900 dark:text-white"></span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] block font-sans text-slate-400 uppercase">Berat / Tinggi</span>
+            <span id="p-stat-physique" class="text-sm font-bold text-slate-900 dark:text-white mt-1 block"></span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] block font-sans text-slate-400 uppercase">Resting HR</span>
+            <span id="p-stat-resthr" class="text-lg font-bold text-emerald-600 dark:text-emerald-400"></span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] block font-sans text-slate-400 uppercase">Max HR Est.</span>
+            <span id="p-stat-maxhr" class="text-lg font-bold text-rose-600 dark:text-rose-400"></span>
+          </div>
+        </div>
+
+        <!-- Active Program Progress Box -->
+        <div class="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
+              <i data-lucide="activity" class="w-4 h-4"></i> Program Latihan Sedang Berjalan
+            </span>
+            <span id="p-prog-percent" class="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-300">0%</span>
+          </div>
+          <p id="p-prog-title" class="text-sm font-bold text-slate-900 dark:text-white"></p>
+          <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden mt-2">
+            <div id="p-prog-bar" class="h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Badges / Achievements -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Lencana & Prestasi</h4>
+          <div id="p-achievements-list" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Heart Rate Zones -->
+      <div id="p-tab-content-hr" class="space-y-3 hidden">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Dihitung otomatis menggunakan formula <strong>Karvonen (Heart Rate Reserve)</strong> berdasarkan usia dan detak jantung istirahat Anda:
+        </p>
+        <div id="p-hr-zones-list" class="space-y-2"></div>
+      </div>
+
+      <!-- Tab Content 3: Personal Bests & Shoes -->
+      <div id="p-tab-content-pbs" class="space-y-4 hidden">
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Rekor Waktu Terbaik (Personal Best)</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
+            <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <span class="text-[10px] block font-sans text-slate-400">PB 5K</span>
+              <strong id="p-pb-5k" class="text-base text-slate-900 dark:text-white">-</strong>
+            </div>
+            <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <span class="text-[10px] block font-sans text-slate-400">PB 10K</span>
+              <strong id="p-pb-10k" class="text-base text-slate-900 dark:text-white">-</strong>
+            </div>
+            <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <span class="text-[10px] block font-sans text-slate-400">PB Half Marathon</span>
+              <strong id="p-pb-hm" class="text-base text-slate-900 dark:text-white">-</strong>
+            </div>
+            <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <span class="text-[10px] block font-sans text-slate-400">PB Marathon</span>
+              <strong id="p-pb-fm" class="text-base text-slate-900 dark:text-white">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">👟 Sepatu Lari Saat Ini:</span>
+          <p id="p-shoes" class="text-xs text-slate-600 dark:text-slate-300"></p>
+        </div>
+      </div>
+
+      <!-- Tab Content 4: Edit Profile Form -->
+      <div id="p-tab-content-edit" class="space-y-3 hidden">
+        <form id="form-edit-profile" onsubmit="App.handleUpdateProfile(event)" class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+              <input type="text" id="edit-name" required class="w-full py-2 px-3 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">URL Foto Profil (Avatar)</label>
+              <input type="url" id="edit-avatar" class="w-full py-2 px-3 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Usia</label>
+              <input type="number" id="edit-age" min="10" max="99" class="w-full py-2 px-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Berat (kg)</label>
+              <input type="number" id="edit-weight" min="30" max="200" class="w-full py-2 px-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Tinggi (cm)</label>
+              <input type="number" id="edit-height" min="100" max="250" class="w-full py-2 px-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Resting HR</label>
+              <input type="number" id="edit-rest-hr" min="35" max="100" class="w-full py-2 px-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Sepatu Lari</label>
+            <input type="text" id="edit-shoes" class="w-full py-2 px-3 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Bio Singkat</label>
+            <textarea id="edit-bio" rows="2" class="w-full py-2 px-3 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition text-xs">
+            Simpan Perubahan Profil
+          </button>
+        </form>
+      </div>
+
+      <!-- Profile Modal Footer -->
+      <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <button type="button" onclick="App.handleLogout()" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition flex items-center gap-1.5">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar Akun
+        </button>
+        <button class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-700 dark:hover:bg-slate-600 transition" onclick="App.closeProfileModal()">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Smartwatch Connection Guide Modal -->
   <div id="smartwatch-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="App.closeSmartwatchGuide()"></div>
@@ -550,6 +819,7 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="js/auth.js"></script>
   <script src="js/pacing.js"></script>
   <script src="js/strength.js"></script>
   <script src="js/tcx.js"></script>
