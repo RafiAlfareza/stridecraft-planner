@@ -30,8 +30,12 @@ const App = {
    * Initialize App
    */
   init() {
+    if (typeof AuthEngine !== 'undefined') {
+      AuthEngine.init();
+    }
     this.loadStateFromStorage();
     this.renderPresets();
+    this.renderNavUser();
     this.bindEvents();
     this.syncPaceFromTime(); // initialize initial target pace calculation
 
@@ -1345,6 +1349,320 @@ const App = {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.body.style.overflow = '';
+    }
+  },
+
+  /**
+   * Render User Session in Navigation Bar
+   */
+  renderNavUser() {
+    const container = document.getElementById('nav-user-container');
+    if (!container || typeof AuthEngine === 'undefined') return;
+
+    const user = AuthEngine.state.currentUser;
+
+    if (user) {
+      const firstName = user.name.split(' ')[0];
+      container.innerHTML = `
+        <button onclick="App.openProfileModal()" class="flex items-center gap-2 py-1 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-emerald-500 transition shadow-sm" title="Buka Profil Pelari">
+          <img src="${user.avatar}" alt="${user.name}" class="w-6 h-6 rounded-lg object-cover border border-emerald-500">
+          <span class="text-xs font-bold text-slate-800 dark:text-slate-100 hidden sm:inline">${firstName}</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        </button>
+      `;
+    } else {
+      container.innerHTML = `
+        <button onclick="App.openAuthModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/20">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span>Masuk / Profil</span>
+        </button>
+      `;
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  /**
+   * Auth Modal Handlers
+   */
+  openAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      this.switchAuthTab('login');
+      if (window.lucide) window.lucide.createIcons();
+    }
+  },
+
+  closeAuthModal() {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  },
+
+  switchAuthTab(tab) {
+    const loginForm = document.getElementById('form-login');
+    const registerForm = document.getElementById('form-register');
+    const tabLoginBtn = document.getElementById('tab-btn-login');
+    const tabRegBtn = document.getElementById('tab-btn-register');
+
+    if (tab === 'login') {
+      if (loginForm) loginForm.classList.remove('hidden');
+      if (registerForm) registerForm.classList.add('hidden');
+      if (tabLoginBtn) {
+        tabLoginBtn.classList.add('border-emerald-500', 'text-slate-900', 'dark:text-white');
+        tabLoginBtn.classList.remove('border-transparent', 'text-slate-400');
+      }
+      if (tabRegBtn) {
+        tabRegBtn.classList.remove('border-emerald-500', 'text-slate-900', 'dark:text-white');
+        tabRegBtn.classList.add('border-transparent', 'text-slate-400');
+      }
+    } else {
+      if (loginForm) loginForm.classList.add('hidden');
+      if (registerForm) registerForm.classList.remove('hidden');
+      if (tabRegBtn) {
+        tabRegBtn.classList.add('border-emerald-500', 'text-slate-900', 'dark:text-white');
+        tabRegBtn.classList.remove('border-transparent', 'text-slate-400');
+      }
+      if (tabLoginBtn) {
+        tabLoginBtn.classList.remove('border-emerald-500', 'text-slate-900', 'dark:text-white');
+        tabLoginBtn.classList.add('border-transparent', 'text-slate-400');
+      }
+    }
+  },
+
+  handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email')?.value;
+    const password = document.getElementById('login-password')?.value;
+    const errorEl = document.getElementById('login-error-msg');
+
+    const result = AuthEngine.login(email, password);
+    if (result.success) {
+      if (errorEl) errorEl.classList.add('hidden');
+      this.closeAuthModal();
+      this.renderNavUser();
+      this.openProfileModal();
+      if (window.confetti) {
+        window.confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
+      }
+    } else {
+      if (errorEl) {
+        errorEl.textContent = result.message;
+        errorEl.classList.remove('hidden');
+      }
+    }
+  },
+
+  handleDemoLogin() {
+    const result = AuthEngine.loginDemo();
+    if (result.success) {
+      this.closeAuthModal();
+      this.renderNavUser();
+      this.openProfileModal();
+      if (window.confetti) {
+        window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
+      }
+    }
+  },
+
+  handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('reg-name')?.value;
+    const email = document.getElementById('reg-email')?.value;
+    const password = document.getElementById('reg-password')?.value;
+    const age = document.getElementById('reg-age')?.value;
+    const restingHR = document.getElementById('reg-resting-hr')?.value;
+    const runningClub = document.getElementById('reg-club')?.value;
+    const errorEl = document.getElementById('reg-error-msg');
+
+    const result = AuthEngine.register({
+      name,
+      email,
+      password,
+      age,
+      restingHR,
+      runningClub
+    });
+
+    if (result.success) {
+      if (errorEl) errorEl.classList.add('hidden');
+      this.closeAuthModal();
+      this.renderNavUser();
+      this.openProfileModal();
+      if (window.confetti) {
+        window.confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
+      }
+    } else {
+      if (errorEl) {
+        errorEl.textContent = result.message;
+        errorEl.classList.remove('hidden');
+      }
+    }
+  },
+
+  handleLogout() {
+    AuthEngine.logout();
+    this.closeProfileModal();
+    this.renderNavUser();
+  },
+
+  /**
+   * Profile Modal Handlers
+   */
+  openProfileModal() {
+    const user = AuthEngine.state.currentUser;
+    if (!user) {
+      this.openAuthModal();
+      return;
+    }
+
+    const modal = document.getElementById('profile-modal');
+    if (!modal) return;
+
+    // Header info
+    document.getElementById('profile-avatar-img').src = user.avatar;
+    document.getElementById('profile-name').textContent = user.name;
+    document.getElementById('profile-email').textContent = user.email + ' • Anggota sejak ' + user.memberSince;
+    document.getElementById('profile-club-badge').textContent = user.runningClub || 'Independent Runner';
+    document.getElementById('profile-bio').textContent = `"${user.bio || 'Pelari fokus pada konsistensi dan kemajuan.'}"`;
+
+    // Overview Stats
+    document.getElementById('p-stat-age').textContent = `${user.age} thn`;
+    document.getElementById('p-stat-physique').textContent = `${user.weightKg} kg / ${user.heightCm} cm`;
+    document.getElementById('p-stat-resthr').textContent = `${user.restingHR} BPM`;
+    document.getElementById('p-stat-maxhr').textContent = `${user.maxHR} BPM`;
+
+    // Active Program Info
+    if (this.state.program) {
+      const meta = this.state.program.metadata;
+      document.getElementById('p-prog-title').textContent = `${meta.targetDistanceName} (Target: ${meta.targetTimeFormatted} @ Pace ${meta.targetPaceFormatted})`;
+      const percent = document.getElementById('progress-percent-label')?.textContent || '0%';
+      document.getElementById('p-prog-percent').textContent = percent;
+      document.getElementById('p-prog-bar').style.width = percent;
+    } else {
+      document.getElementById('p-prog-title').textContent = 'Belum ada program yang dibuat';
+      document.getElementById('p-prog-percent').textContent = '0%';
+      document.getElementById('p-prog-bar').style.width = '0%';
+    }
+
+    // Achievements list
+    const achContainer = document.getElementById('p-achievements-list');
+    if (achContainer) {
+      achContainer.innerHTML = (user.achievements || []).map(ach => `
+        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200 border border-amber-200 dark:border-amber-900">
+          🏆 ${ach}
+        </span>
+      `).join('');
+    }
+
+    // Personalized Heart Rate Zones
+    const hrData = AuthEngine.calculatePersonalizedHRZones();
+    const hrContainer = document.getElementById('p-hr-zones-list');
+    if (hrContainer && hrData) {
+      hrContainer.innerHTML = hrData.zones.map(z => `
+        <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${z.color}"></span>
+            <div>
+              <div class="flex items-center gap-2">
+                <strong class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">${z.zone}: ${z.name}</strong>
+                <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${z.rangePct}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">${z.desc}</p>
+            </div>
+          </div>
+          <span class="text-xs sm:text-sm font-bold font-mono text-slate-900 dark:text-white shrink-0 ml-2">${z.bpmRange}</span>
+        </div>
+      `).join('');
+    }
+
+    // PBs & Shoes
+    document.getElementById('p-pb-5k').textContent = user.pbs?.pb5k || '-';
+    document.getElementById('p-pb-10k').textContent = user.pbs?.pb10k || '-';
+    document.getElementById('p-pb-hm').textContent = user.pbs?.pbHm || '-';
+    document.getElementById('p-pb-fm').textContent = user.pbs?.pbFm || '-';
+    document.getElementById('p-shoes').textContent = user.shoes || 'Belum diisi';
+
+    // Edit form fields prefilled
+    document.getElementById('edit-name').value = user.name;
+    document.getElementById('edit-avatar').value = user.avatar;
+    document.getElementById('edit-age').value = user.age;
+    document.getElementById('edit-weight').value = user.weightKg;
+    document.getElementById('edit-height').value = user.heightCm;
+    document.getElementById('edit-rest-hr').value = user.restingHR;
+    document.getElementById('edit-shoes').value = user.shoes || '';
+    document.getElementById('edit-bio').value = user.bio || '';
+
+    this.switchProfileTab('overview');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  closeProfileModal() {
+    const modal = document.getElementById('profile-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  },
+
+  switchProfileTab(tab) {
+    const tabs = ['overview', 'hr', 'pbs', 'edit'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`p-tab-btn-${t}`);
+      const content = document.getElementById(`p-tab-content-${t}`);
+      if (t === tab) {
+        if (btn) {
+          btn.classList.add('bg-emerald-600', 'text-white');
+          btn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+        }
+        if (content) content.classList.remove('hidden');
+      } else {
+        if (btn) {
+          btn.classList.remove('bg-emerald-600', 'text-white');
+          btn.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+        }
+        if (content) content.classList.add('hidden');
+      }
+    });
+  },
+
+  handleUpdateProfile(e) {
+    e.preventDefault();
+    const name = document.getElementById('edit-name')?.value;
+    const avatar = document.getElementById('edit-avatar')?.value;
+    const age = document.getElementById('edit-age')?.value;
+    const weightKg = document.getElementById('edit-weight')?.value;
+    const heightCm = document.getElementById('edit-height')?.value;
+    const restingHR = document.getElementById('edit-rest-hr')?.value;
+    const shoes = document.getElementById('edit-shoes')?.value;
+    const bio = document.getElementById('edit-bio')?.value;
+
+    const result = AuthEngine.updateProfile({
+      name,
+      avatar,
+      age,
+      weightKg,
+      heightCm,
+      restingHR,
+      shoes,
+      bio
+    });
+
+    if (result.success) {
+      alert('Profil berhasil diperbarui!');
+      this.renderNavUser();
+      this.openProfileModal();
     }
   }
 };
