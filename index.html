@@ -444,39 +444,67 @@
       </div>
 
       <div class="space-y-4 text-xs sm:text-sm">
-        <!-- Metode 1: Kalender (Paling Mudah & Otomatis) -->
+        <!-- Catatan Penting Mengenai Web Garmin -->
+        <div class="p-3.5 rounded-xl border border-amber-300 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200">
+          <div class="flex items-center gap-2 font-bold mb-1">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+            <span>PENTING: Kenapa Garmin Web Menolak Upload File?</span>
+          </div>
+          <p class="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+            Halaman <em>"Import Data"</em> di web Garmin (<code class="bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">connect.garmin.com/modern/import-data</code>) <strong>hanya menerima riwayat aktivitas yang sudah selesai berlari</strong>, bukan rencana latihan (workout).
+            Untuk memasukkan jadwal latihan ke Garmin, gunakan 3 cara resmi di bawah ini:
+          </p>
+        </div>
+
+        <!-- Cara 1: Kalender (Paling Mudah, Tanpa Kabel) -->
         <div class="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20">
           <div class="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-400 text-sm mb-2">
             <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">1</span>
-            <span>Metode 1: Sinkronisasi Kalender (.ics) — Otomatis Muncul Setiap Hari</span>
+            <span>Cara 1: Sinkronisasi Kalender (.ics) — Otomatis Muncul di Jam Setiap Hari</span>
           </div>
           <p class="text-slate-600 dark:text-slate-300 mb-2">
-            Metode ini memasukkan seluruh program latihan (misal 12 minggu) langsung ke kalender smartwatch Anda dengan alarm getar harian.
+            Seluruh program latihan (8–16 minggu) langsung masuk ke widget <strong>Calendar</strong> di jam tangan Anda:
           </p>
           <ol class="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 pl-1">
-            <li>Klik tombol hijau <strong>"Export Kalender (.ics)"</strong> di bagian atas web ini untuk mengunduh berkas kalender.</li>
-            <li>Buka file tersebut di HP/Laptop Anda dan impor ke <strong>Google Calendar</strong> atau <strong>Apple Calendar</strong>.</li>
-            <li><strong>Garmin:</strong> Buka aplikasi <em>Garmin Connect</em> di HP → <em>Settings</em> → <em>3rd Party Apps</em> → aktifkan <em>Calendar Sync</em>. Setiap pagi jam Garmin akan memunculkan menu latihan hari itu!</li>
-            <li><strong>Apple Watch:</strong> Buka app <em>Calendar</em> bawaan Apple Watch, jadwal latihan otomatis tersinkron dan memberi notifikasi target jarak & pace.</li>
-            <li><strong>Coros & Samsung Galaxy Watch:</strong> Aktifkan sinkronisasi kalender di aplikasi HP (Coros App / Galaxy Wearable).</li>
+            <li>Klik tombol hijau <strong>"Export Kalender (.ics)"</strong> di bagian atas web ini.</li>
+            <li>Buka file tersebut di HP dan masukkan ke <strong>Google Calendar</strong> atau <strong>Apple Calendar</strong>.</li>
+            <li>Buka aplikasi <strong>Garmin Connect</strong> di HP → Masuk ke tab <strong>More (•••)</strong> di kanan bawah → <strong>Settings</strong> → <strong>Connected Apps</strong> → Pilih <strong>Google Calendar / Calendar</strong> → Aktifkan <strong>Sync Workouts</strong>.</li>
+            <li>Buka kalender di jam tangan Garmin Anda, menu latihan hari ini otomatis muncul di pergelangan tangan!</li>
           </ol>
         </div>
 
-        <!-- Metode 2: File Latihan Terstruktur (.tcx) -->
+        <!-- Cara 2: Kabel USB Langsung ke Jam (Format .FIT) -->
         <div class="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20">
           <div class="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-400 text-sm mb-2">
             <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">2</span>
-            <span>Metode 2: Unduh Menu Terstruktur (.tcx) — Dilengkapi Alarm Pace & Interval</span>
+            <span>Cara 2: Kabel USB Langsung ke Jam (Format .FIT Asli Garmin) — 100% Berhasil</span>
           </div>
           <p class="text-slate-600 dark:text-slate-300 mb-2">
-            Jam akan bergetar dan berbunyi otomatis saat Anda berlari terlalu lambat/cepat dari target pace, serta menghitung mundur waktu interval dan rest:
+            Jam Garmin membaca file biner <code class="bg-blue-100 dark:bg-blue-900/60 px-1 py-0.5 rounded font-mono">.FIT</code> seperti flashdisk:
           </p>
           <ol class="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 pl-1">
-            <li>Klik <strong>"Detail Menu"</strong> pada sesi latihan yang diinginkan (misal: <em>Interval 5x800m</em> atau <em>Tempo Run</em>).</li>
-            <li>Klik tombol biru <strong>"File Jam (.tcx)"</strong> di dalam modal untuk mengunduh berkas latihan terstruktur.</li>
-            <li><strong>Garmin:</strong> Masuk ke <a href="https://connect.garmin.com" target="_blank" class="text-blue-600 dark:text-blue-400 underline font-semibold">connect.garmin.com</a> di browser → Menu <em>Training & Planning</em> → <em>Workouts</em> → Impor file .tcx tersebut, lalu klik <em>Send to Device</em>.</li>
-            <li><strong>Coros:</strong> Buka <a href="https://training.coros.com" target="_blank" class="text-blue-600 dark:text-blue-400 underline font-semibold">Coros Training Hub</a> di browser → Impor workout ke kalender akun Coros Anda.</li>
-            <li><strong>Apple Watch:</strong> Gunakan aplikasi pihak ketiga seperti <strong>WorkOutDoors</strong> (bisa mengimpor file TCX/GPX langsung ke Apple Watch).</li>
+            <li>Buka <strong>"Detail Menu"</strong> pada sesi latihan yang diinginkan (misal Interval 5x800m).</li>
+            <li>Klik tombol hijau <strong>"Garmin (.fit)"</strong> untuk mengunduh file biner asli Garmin.</li>
+            <li>Hubungkan jam tangan Garmin ke laptop dengan kabel charger/data USB. Jam akan terbaca sebagai drive bernama <strong>GARMIN</strong>.</li>
+            <li>Buka folder <code class="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">GARMIN/NewFiles</code> (atau <code class="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">GARMIN/Workouts</code>).</li>
+            <li>Copy & paste file <code class="font-mono">.fit</code> yang baru diunduh ke dalam folder tersebut, lalu cabut kabel.</li>
+            <li>Di jam Garmin Anda: Buka menu <strong>Lari (Run)</strong> → Tahan tombol tengah (Menu) → Pilih <strong>Training (Latihan)</strong> → <strong>Workouts</strong>. Latihan sudah siap dimulai dengan alarm getar interval!</li>
+          </ol>
+        </div>
+
+        <!-- Cara 3: Ekstensi Garmin Workout Importer (Format .JSON) -->
+        <div class="p-4 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-purple-50/40 dark:bg-purple-950/20">
+          <div class="flex items-center gap-2 font-bold text-purple-800 dark:text-purple-400 text-sm mb-2">
+            <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs">3</span>
+            <span>Cara 3: Ekstensi Browser "Garmin Workout Importer" (Format .JSON)</span>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 mb-2">
+            Untuk memasukkan latihan langsung ke akun cloud Garmin Connect tanpa kabel:
+          </p>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-300 pl-1">
+            <li>Pasang ekstensi gratis Chrome/Edge: <strong>Garmin Workout Importer</strong> dari Chrome Web Store.</li>
+            <li>Di StrideCraft, buka Detail Menu lalu klik tombol biru <strong>"Garmin (.json)"</strong>.</li>
+            <li>Buka tab Garmin Connect Anda di browser, klik ikon ekstensi tersebut, lalu pilih file <code class="font-mono">.json</code> yang diunduh. Latihan langsung tersimpan di akun Garmin Anda dan otomatis tersinkron ke jam tangan!</li>
           </ol>
         </div>
       </div>
@@ -525,6 +553,8 @@
   <script src="js/pacing.js"></script>
   <script src="js/strength.js"></script>
   <script src="js/tcx.js"></script>
+  <script src="js/fit.js"></script>
+  <script src="js/garmin_json.js"></script>
   <script src="js/generator.js"></script>
   <script src="js/presets.js"></script>
   <script src="js/calendar.js"></script>
