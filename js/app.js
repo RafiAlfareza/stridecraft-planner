@@ -34,7 +34,13 @@ const App = {
       AuthEngine.init();
     }
     if (typeof StravaEngine !== 'undefined') {
-      StravaEngine.init();
+      StravaEngine.init().then(connected => {
+        if (connected) {
+          this.renderStravaSection();
+          if (window.confetti) window.confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
+          alert('Selamat! Akun Strava asli Anda berhasil terhubung dan aktivitas lari telah disinkronkan.');
+        }
+      });
     }
     this.loadStateFromStorage();
     this.renderPresets();
@@ -1789,9 +1795,30 @@ const App = {
 
     const isConnected = StravaEngine.state.isConnected;
     const statusText = document.getElementById('strava-modal-status-text');
+    const disconnectBtn = document.getElementById('btn-strava-disconnect');
+    const clientIdInput = document.getElementById('input-strava-client-id');
+    const clientSecretInput = document.getElementById('input-strava-client-secret');
+
     if (statusText) {
-      statusText.textContent = isConnected ? 'Terhubung (Aktif)' : 'Belum Terhubung';
-      statusText.className = isConnected ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'font-semibold text-slate-400';
+      if (isConnected) {
+        const athleteName = StravaEngine.state.athlete ? `${StravaEngine.state.athlete.firstname} ${StravaEngine.state.athlete.lastname}` : 'Akun Strava';
+        statusText.textContent = `Terhubung: ${athleteName}`;
+        statusText.className = 'text-sm font-bold text-emerald-600 dark:text-emerald-400';
+      } else {
+        statusText.textContent = 'Belum Terhubung';
+        statusText.className = 'text-sm font-bold text-slate-500';
+      }
+    }
+
+    if (disconnectBtn) {
+      disconnectBtn.classList.toggle('hidden', !isConnected);
+    }
+
+    if (clientIdInput && StravaEngine.state.clientId) {
+      clientIdInput.value = StravaEngine.state.clientId;
+    }
+    if (clientSecretInput && StravaEngine.state.clientSecret) {
+      clientSecretInput.value = StravaEngine.state.clientSecret;
     }
 
     modal.classList.remove('hidden');
@@ -1810,6 +1837,21 @@ const App = {
     }
   },
 
+  handleStartStravaOAuth() {
+    const clientId = document.getElementById('input-strava-client-id')?.value;
+    const clientSecret = document.getElementById('input-strava-client-secret')?.value;
+
+    if (!clientId || !clientSecret) {
+      alert('Harap masukkan Client ID dan Client Secret dari akun Strava Anda (lihat panduan di bawah).');
+      return;
+    }
+
+    const res = StravaEngine.startOAuthFlow(clientId, clientSecret);
+    if (!res.success) {
+      alert(res.message);
+    }
+  },
+
   handleStravaConnectDemo() {
     StravaEngine.connectDemo();
     this.closeStravaModal();
@@ -1817,28 +1859,6 @@ const App = {
     if (window.confetti) {
       window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
     }
-    alert('Riwayat lari Strava berhasil dimuat ke StrideCraft!');
-  },
-
-  handleStravaConnectToken() {
-    const token = document.getElementById('input-strava-token')?.value;
-    if (!token) {
-      alert('Harap masukkan Access Token Strava Anda.');
-      return;
-    }
-
-    StravaEngine.connectWithToken(token)
-      .then(res => {
-        this.closeStravaModal();
-        this.renderStravaSection();
-        alert(`Berhasil terhubung ke Strava! ${res.count} aktivitas lari berhasil disinkronkan.`);
-        if (window.confetti) {
-          window.confetti({ particleCount: 40, spread: 70, origin: { y: 0.8 } });
-        }
-      })
-      .catch(err => {
-        alert(err.message || 'Gagal menghubungkan ke Strava.');
-      });
   },
 
   handleStravaDisconnect() {
@@ -1851,7 +1871,14 @@ const App = {
 
   refreshStravaActivities() {
     if (StravaEngine.state.accessToken && StravaEngine.state.accessToken !== 'demo_token_strava_preview') {
-      this.handleStravaConnectToken();
+      StravaEngine.fetchRealActivities()
+        .then(() => {
+          this.renderStravaSection();
+          alert('Riwayat lari Strava berhasil diperbarui!');
+        })
+        .catch(err => {
+          alert('Gagal memperbarui: ' + err.message);
+        });
     } else {
       StravaEngine.loadDemoActivities();
       this.renderStravaSection();
